@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cambiar contraseña</title>
+    <style>
+        body{
+            font-family:Arial;
+            background:#f4f6f8;
+            margin:0;
+            padding:20px;
+        }
+
+        .contenedor{
+            max-width:700px;
+            margin:auto;
+            background:white;
+            padding:25px;
+            border-radius:12px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        h1{
+            text-align:center;
+            color:#1f4e79;
+        }
+
+        form{
+            display:grid;
+            gap:15px;
+        }
+
+        input{
+            padding:10px;
+            border:1px solid #ccc;
+            border-radius:8px;
+            font-size:15px;
+        }
+
+        button{
+            padding:12px;
+            background:#1f4e79;
+            color:white;
+            border:none;
+            border-radius:8px;
+            cursor:pointer;
+        }
+
+        .mensaje{
+            text-align:center;
+            color:red;
+            font-weight:bold;
+            margin-bottom:15px;
+        }
+
+        .volver{
+            display:inline-block;
+            margin-top:20px;
+            background:#6c757d;
+            color:white;
+            padding:10px 15px;
+            text-decoration:none;
+            border-radius:6px;
+        }
+
+        p{
+            text-align:center;
+        }
+    </style>
+</head>
+<body>
+    <div class="contenedor">
+        <h1>Cambiar contraseña</h1>
+
+        <p><strong>Usuario:</strong> {{ usuario_clave[2] }}</p>
+        <p><strong>Nombre:</strong> {{ usuario_clave[1] }}</p>
+
+        {% if mensaje %}
+            <div class="mensaje">{{ mensaje }}</div>
+        {% endif %}
+
+        <form method="POST">
+            <input type="password" name="nueva_clave" placeholder="Nueva contraseña" required>
+            <input type="password" name="confirmar_clave" placeholder="Confirmar contraseña" required>
+            <button type="submit">Guardar nueva contraseña</button>
+        </form>
+
+        <a class="volver" href="{{ url_for('configuracion') }}" target="contenido">Volver</a>>
+    </div>
+</body>
+</html>

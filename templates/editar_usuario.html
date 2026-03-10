@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar usuario</title>
+    <style>
+        body{
+            font-family:Arial;
+            background:#f4f6f8;
+            margin:0;
+            padding:20px;
+        }
+
+        .contenedor{
+            max-width:900px;
+            margin:auto;
+            background:white;
+            padding:25px;
+            border-radius:12px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        h1{
+            text-align:center;
+            color:#1f4e79;
+        }
+
+        form{
+            display:grid;
+            grid-template-columns:repeat(2, 1fr);
+            gap:15px;
+        }
+
+        input, select{
+            padding:10px;
+            border:1px solid #ccc;
+            border-radius:8px;
+            font-size:15px;
+        }
+
+        .permisos{
+            grid-column:1 / -1;
+            display:flex;
+            flex-wrap:wrap;
+            gap:20px;
+        }
+
+        button{
+            grid-column:1 / -1;
+            padding:12px;
+            background:#1f4e79;
+            color:white;
+            border:none;
+            border-radius:8px;
+            cursor:pointer;
+        }
+
+        .mensaje{
+            text-align:center;
+            color:red;
+            font-weight:bold;
+            margin-bottom:15px;
+        }
+
+        .volver{
+            display:inline-block;
+            margin-top:20px;
+            background:#6c757d;
+            color:white;
+            padding:10px 15px;
+            text-decoration:none;
+            border-radius:6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="contenedor">
+        <h1>Editar usuario</h1>
+
+        {% if mensaje %}
+            <div class="mensaje">{{ mensaje }}</div>
+        {% endif %}
+
+        <form method="POST">
+            <input type="text" name="nombre" value="{{ usuario_editar[1] }}" required>
+            <input type="text" name="usuario" value="{{ usuario_editar[2] }}" required>
+
+            <select name="rol" required>
+                <option value="admin" {% if usuario_editar[3] == "admin" %}selected{% endif %}>Administrador</option>
+                <option value="cajero" {% if usuario_editar[3] == "cajero" %}selected{% endif %}>Cajero</option>
+                <option value="supervisor" {% if usuario_editar[3] == "supervisor" %}selected{% endif %}>Supervisor</option>
+            </select>
+
+            <div></div>
+
+            <div class="permisos">
+                <label><input type="checkbox" name="permiso_inventario" {% if usuario_editar[4] == 1 %}checked{% endif %}> Inventario</label>
+                <label><input type="checkbox" name="permiso_ventas" {% if usuario_editar[5] == 1 %}checked{% endif %}> Ventas</label>
+                <label><input type="checkbox" name="permiso_clientes" {% if usuario_editar[6] == 1 %}checked{% endif %}> Clientes</label>
+                <label><input type="checkbox" name="permiso_reportes" {% if usuario_editar[7] == 1 %}checked{% endif %}> Reportes</label>
+                <label><input type="checkbox" name="permiso_configuracion" {% if usuario_editar[8] == 1 %}checked{% endif %}> Configuración</label>
+            </div>
+
+            <button type="submit">Guardar cambios</button>
+        </form>
+
+        <a class="volver" href="{{ url_for('configuracion_usuarios') }}" target="contenido">Volver</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reportes</title>
+    <style>
+        body{
+            font-family:Arial;
+            background:#f4f6f8;
+            margin:0;
+            padding:20px;
+        }
+
+        .contenedor{
+            width:1100px;
+            margin:auto;
+        }
+
+        h1, h2{
+            text-align:center;
+            color:#1f4e79;
+        }
+
+        .tarjetas{
+            display:grid;
+            grid-template-columns:repeat(4, 1fr);
+            gap:15px;
+            margin-top:20px;
+        }
+
+        .tarjeta{
+            background:white;
+            padding:20px;
+            border-radius:12px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.1);
+            text-align:center;
+        }
+
+        .valor{
+            font-size:24px;
+            font-weight:bold;
+            color:#1f4e79;
+            margin-top:10px;
+        }
+
+        .bloque{
+            background:white;
+            margin-top:25px;
+            padding:20px;
+            border-radius:12px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        form{
+            text-align:center;
+            margin-bottom:20px;
+        }
+
+        input, button{
+            padding:10px;
+            font-size:16px;
+        }
+
+        button{
+            background:#1f4e79;
+            color:white;
+            border:none;
+            border-radius:6px;
+            cursor:pointer;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            margin-top:15px;
+        }
+
+        th, td{
+            border:1px solid #ccc;
+            padding:10px;
+            text-align:center;
+        }
+
+        th{
+            background:#1f4e79;
+            color:white;
+        }
+
+        .total-dia{
+            margin-top:20px;
+            text-align:right;
+            font-size:22px;
+            color:#1f4e79;
+            font-weight:bold;
+        }
+
+        .btn-factura{
+            display:inline-block;
+            background:#198754;
+            color:white;
+            text-decoration:none;
+            border-radius:6px;
+            padding:8px 12px;
+        }
+
+        .btn-factura:hover{
+            background:#157347;
+        }
+
+        .volver{
+            display:inline-block;
+            margin-top:20px;
+            background:#1f4e79;
+            color:white;
+            padding:10px 15px;
+            border-radius:6px;
+            text-decoration:none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="contenedor">
+    <h1>Reportes del Sistema</h1>
+
+    <div class="tarjetas">
+        <div class="tarjeta">
+            <h3>Total productos</h3>
+            <div class="valor">{{ total_productos }}</div>
+        </div>
+
+        <div class="tarjeta">
+            <h3>Total clientes</h3>
+            <div class="valor">{{ total_clientes }}</div>
+        </div>
+
+        <div class="tarjeta">
+            <h3>Total ventas</h3>
+            <div class="valor">{{ cantidad_ventas }}</div>
+        </div>
+
+        <div class="tarjeta">
+            <h3>Ingresos</h3>
+            <div class="valor">RD$ {{ "%.2f"|format(total_ingresos) }}</div>
+        </div>
+    </div>
+
+    <div class="bloque">
+        <h2>Productos más vendidos</h2>
+        <table>
+            <tr>
+                <th>Producto</th>
+                <th>Cantidad vendida</th>
+            </tr>
+            {% for producto in productos_mas_vendidos %}
+            <tr>
+                <td>{{ producto[0] }}</td>
+                <td>{{ producto[1] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div class="bloque">
+        <h2>Reporte por día</h2>
+
+        <form method="POST">
+            <input type="date" name="fecha" value="{{ fecha_buscar }}" required>
+            <button type="submit">Buscar</button>
+        </form>
+
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Producto</th>
+                <th>Cliente</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
+                <th>Total</th>
+                <th>Fecha</th>
+                <th>Factura</th>
+            </tr>
+
+            {% if ventas_dia %}
+                {% for venta in ventas_dia %}
+                <tr>
+                    <td>{{ venta[0] }}</td>
+                    <td>{{ venta[1] }}</td>
+                    <td>{{ venta[2] }}</td>
+                    <td>{{ venta[3] }}</td>
+                    <td>RD$ {{ "%.2f"|format(venta[4]) }}</td>
+                    <td>RD$ {{ "%.2f"|format(venta[5]) }}</td>
+                    <td>{{ venta[6] }}</td>
+                    <td>
+                        <a class="btn-factura" href="{{ url_for('ver_factura', venta_id=venta[0]) }}" target="_blank">
+                            Ver factura
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="8">No hay ventas registradas para esta fecha.</td>
+                </tr>
+            {% endif %}
+        </table>
+
+        <div class="total-dia">
+            Total vendido del día: RD$ {{ "%.2f"|format(total_dia) }}
+        </div>
+    </div>
+
+   <div style="margin-top:20px; display:flex; gap:10px;">
+    <a class="volver" href="{{ url_for('imprimir_inventario_pdf') }}" target="_blank">🖨 Imprimir inventario PDF</a>
+    <a class="volver" href="/panel">Volver al panel</a>
+</div>>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Ventas</title>
+
+<style>
+body{
+font-family:Arial;
+background:#f4f6f8;
+margin:0;
+padding:20px;
+}
+
+.contenedor{
+width:1000px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+
+h1,h2{
+text-align:center;
+color:#1f4e79;
+}
+
+form{
+display:grid;
+grid-template-columns:2fr 2fr 2fr 1fr auto;
+gap:10px;
+margin-bottom:20px;
+}
+
+select,input,button{
+padding:10px;
+}
+
+button{
+background:#1f4e79;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+th,td{
+border:1px solid #ccc;
+padding:10px;
+text-align:center;
+}
+
+th{
+background:#1f4e79;
+color:white;
+}
+
+.mensaje{
+text-align:center;
+font-weight:bold;
+color:green;
+margin-top:10px;
+}
+
+.total{
+text-align:right;
+font-size:20px;
+margin-top:20px;
+color:#1f4e79;
+font-weight:bold;
+}
+
+.volver{
+display:inline-block;
+margin-top:20px;
+background:#1f4e79;
+color:white;
+padding:10px 15px;
+border-radius:6px;
+text-decoration:none;
+}
+
+.btn-descargar{
+display:inline-block;
+background:#0d6efd;
+color:white;
+padding:8px 10px;
+border-radius:6px;
+text-decoration:none;
+margin:2px;
+font-size:13px;
+}
+
+.btn-imprimir{
+display:inline-block;
+background:#198754;
+color:white;
+padding:8px 10px;
+border-radius:6px;
+text-decoration:none;
+margin:2px;
+font-size:13px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="contenedor">
+
+<h1>Módulo de Ventas</h1>
+
+<form method="POST">
+
+<select name="producto_id" required>
+<option value="">Seleccione un producto</option>
+{% for producto in productos %}
+<option value="{{ producto[0] }}">
+{{ producto[1] }} - Precio: {{ producto[2] }} - Stock: {{ producto[3] }}
+</option>
+{% endfor %}
+</select>
+
+<select name="cliente_id">
+<option value="">Seleccione un cliente de la lista</option>
+{% for cliente in clientes %}
+<option value="{{ cliente[0] }}">
+{{ cliente[1] }}
+</option>
+{% endfor %}
+</select>
+
+<input type="text" name="cliente_nombre_manual" placeholder="O escriba el nombre del cliente">
+
+<input type="number" name="cantidad" placeholder="Cantidad" required min="1">
+
+<button type="submit">Vender</button>
+
+</form>
+
+{% if mensaje %}
+<div class="mensaje">{{ mensaje }}</div>
+{% endif %}
+
+<h2>Historial de Ventas</h2>
+
+<table>
+<tr>
+<th>ID</th>
+<th>Producto</th>
+<th>Cliente</th>
+<th>Cantidad</th>
+<th>Precio</th>
+<th>Total</th>
+<th>Acciones</th>
+</tr>
+
+{% for venta in historial %}
+<tr>
+<td>{{ venta[0] }}</td>
+<td>{{ venta[2] }}</td>
+<td>{{ venta[7] }}</td>
+<td>{{ venta[3] }}</td>
+<td>RD$ {{ venta[4] }}</td>
+<td>RD$ {{ venta[5] }}</td>
+<td>
+<a class="btn-descargar" href="{{ url_for('descargar_factura', venta_id=venta[0]) }}">
+Descargar
+</a>
+
+<a class="btn-imprimir" href="{{ url_for('ver_factura', venta_id=venta[0]) }}" target="_blank">
+Imprimir
+</a>
+</td>
+</tr>
+{% endfor %}
+
+</table>
+
+<div class="total">
+Total vendido: {{ total_vendido }}
+</div>
+
+<a class="volver" href="/panel">Volver al panel</a>
+
+</div>
+
+</body>
+</html>

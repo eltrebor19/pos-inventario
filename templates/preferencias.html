@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Preferencias</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    background:#f4f6f8;
+    padding:30px;
+}
+
+.contenedor{
+    max-width:700px;
+    margin:auto;
+    background:white;
+    padding:30px;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+
+h1{
+    text-align:center;
+    color:#1f4e79;
+}
+
+.bloque{
+    margin-top:30px;
+    text-align:center;
+}
+
+button{
+    padding:12px 25px;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+btn-buscar{
+.btn-actualizar{
+    background:#198754;
+    color:white;
+}
+
+.version{
+    font-size:18px;
+    margin-top:15px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="contenedor">
+
+<h1>⚙ Preferencias del Sistema</h1>
+
+<div class="bloque">
+
+<h3>Versión actual del sistema</h3>
+
+<h3>Versión actual del sistema</h3>
+
+<div class="version">
+    Versión {{ version }}
+</div>
+
+{% if mensaje %}
+<div style="margin-top:20px; font-weight:bold; color:#198754; text-align:center;">
+    {{ mensaje }}
+</div>
+{% endif %}
+
+</div>
+
+<div class="bloque">
+    <a class="btn-buscar" href="{{ url_for('buscar_actualizacion') }}">
+        🔍 Buscar actualizaciones
+    </a>
+</div>
+
+
+<div class="bloque">
+
+<button class="btn-actualizar">
+⬆ Actualizar sistema
+</button>
+
+</div>
+
+</div>
+
+</body>
+</html>

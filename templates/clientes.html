@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Clientes</title>
+    <style>
+        body{
+            font-family:Arial;
+            background:#f4f6f8;
+            margin:0;
+            padding:20px;
+        }
+
+        .contenedor{
+            width:1000px;
+            margin:auto;
+            background:white;
+            padding:20px;
+            border-radius:12px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h1{
+            text-align:center;
+            color:#1f4e79;
+        }
+
+        form{
+            display:grid;
+            grid-template-columns:repeat(4, 1fr) auto;
+            gap:10px;
+            margin-bottom:20px;
+        }
+
+        input, button{
+            padding:10px;
+        }
+
+        button{
+            background:#1f4e79;
+            color:white;
+            border:none;
+            border-radius:6px;
+            cursor:pointer;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            margin-top:20px;
+        }
+
+        th, td{
+            border:1px solid #ccc;
+            padding:10px;
+            text-align:center;
+        }
+
+        th{
+            background:#1f4e79;
+            color:white;
+        }
+
+        .mensaje{
+            text-align:center;
+            color:green;
+            font-weight:bold;
+            margin:10px 0;
+        }
+
+        .btn-eliminar{
+            text-decoration:none;
+            color:white;
+            background:#c0392b;
+            padding:6px 10px;
+            border-radius:5px;
+        }
+
+        .btn-eliminar:hover{
+            background:#922b21;
+        }
+
+        .volver{
+            display:inline-block;
+            margin-top:20px;
+            background:#1f4e79;
+            color:white;
+            padding:10px 15px;
+            border-radius:6px;
+            text-decoration:none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="contenedor">
+    <h1>Módulo de Clientes</h1>
+
+    <form method="POST">
+        <input type="text" name="nombre" placeholder="Nombre del cliente" required>
+        <input type="text" name="telefono" placeholder="Teléfono">
+        <input type="email" name="correo" placeholder="Correo">
+        <input type="text" name="direccion" placeholder="Dirección">
+        <button type="submit">Guardar</button>
+    </form>
+
+    {% if mensaje %}
+        <div class="mensaje">{{ mensaje }}</div>
+    {% endif %}
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Correo</th>
+            <th>Dirección</th>
+            <th>Acción</th>
+        </tr>
+
+        {% for cliente in clientes %}
+        <tr>
+            <td>{{ cliente[0] }}</td>
+            <td>{{ cliente[1] }}</td>
+            <td>{{ cliente[2] }}</td>
+            <td>{{ cliente[3] }}</td>
+            <td>{{ cliente[4] }}</td>
+
+            <td>
+                <a class="btn-eliminar"
+                   href="/eliminar_cliente/{{ cliente[0] }}"
+                   onclick="return confirm('¿Eliminar cliente?')">
+                   Eliminar
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+
+    </table>
+
+    <a class="volver" href="/panel">Volver al panel</a>
+</div>
+
+</body>
+</html>

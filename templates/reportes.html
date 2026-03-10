@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reportes</title>
+    <style>
+        body{
+            font-family:Arial;
+            background:#f4f6f8;
+            margin:0;
+            padding:20px;
+        }
+
+        .contenedor{
+            width:1000px;
+            margin:auto;
+        }
+
+        h1{
+            text-align:center;
+            color:#1f4e79;
+        }
+
+        .tarjetas{
+            display:grid;
+            grid-template-columns:repeat(4, 1fr);
+            gap:15px;
+            margin-top:20px;
+        }
+
+        .tarjeta{
+            background:white;
+            padding:20px;
+            border-radius:12px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.1);
+            text-align:center;
+        }
+
+        .valor{
+            font-size:24px;
+            font-weight:bold;
+            color:#1f4e79;
+            margin-top:10px;
+        }
+
+        .tabla{
+            background:white;
+            margin-top:25px;
+            padding:20px;
+            border-radius:12px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        th, td{
+            border:1px solid #ccc;
+            padding:10px;
+            text-align:center;
+        }
+
+        th{
+            background:#1f4e79;
+            color:white;
+        }
+
+        .volver{
+            display:inline-block;
+            margin-top:20px;
+            background:#1f4e79;
+            color:white;
+            padding:10px 15px;
+            border-radius:6px;
+            text-decoration:none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="contenedor">
+    <h1>Reportes del Sistema</h1>
+
+    <div class="tarjetas">
+        <div class="tarjeta">
+            <h3>Total productos</h3>
+            <div class="valor">{{ total_productos }}</div>
+        </div>
+
+        <div class="tarjeta">
+            <h3>Total clientes</h3>
+            <div class="valor">{{ total_clientes }}</div>
+        </div>
+
+        <div class="tarjeta">
+            <h3>Total ventas</h3>
+            <div class="valor">{{ cantidad_ventas }}</div>
+        </div>
+
+        <div class="tarjeta">
+            <h3>Ingresos</h3>
+            <div class="valor">{{ total_ingresos }}</div>
+        </div>
+    </div>
+
+    <div class="tabla">
+        <h2>Productos más vendidos</h2>
+        <table>
+            <tr>
+                <th>Producto</th>
+                <th>Cantidad vendida</th>
+            </tr>
+            {% for producto in productos_mas_vendidos %}
+            <tr>
+                <td>{{ producto[0] }}</td>
+                <td>{{ producto[1] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div style="margin-top:20px; display:flex; gap:10px;">
+    <a class="volver" href="{{ url_for('imprimir_inventario_pdf') }}" target="_blank">🖨 Imprimir inventario PDF</a>
+    <a class="volver" href="/panel">Volver al panel</a>
+</div>
+</div>
+
+</body>
+</html>
