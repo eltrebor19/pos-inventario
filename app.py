@@ -9,6 +9,158 @@ from reportlab.lib.utils import ImageReader
 app = Flask(__name__)
 app.secret_key = "mi_clave_secreta_2026"
 
+import smtplib
+from email.message import EmailMessage
+import shutil
+
+def crear_tabla_configuracion():
+    conexion = sqlite3.connect("pos.db")
+    cursor = conexion.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS configuracion (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            correo_respaldo TEXT
+        )
+    """)
+
+    cursor.execute("SELECT COUNT(*) FROM configuracion")
+    total = cursor.fetchone()[0]
+
+    if total == 0:
+        cursor.execute("""
+            INSERT INTO configuracion (correo_respaldo)
+            VALUES (?)
+        """, ("",))
+
+    conexion.commit()
+    conexion.close()
+
+
+def obtener_correo_respaldo():
+    conexion = sqlite3.connect("pos.db")
+    cursor = conexion.cursor()
+
+    cursor.execute("SELECT correo_respaldo FROM configuracion LIMIT 1")
+    fila = cursor.fetchone()
+
+    conexion.close()
+
+    if fila and fila[0]:
+        return fila[0]
+    return ""
+
+
+def guardar_correo_respaldo(correo):
+    conexion = sqlite3.connect("pos.db")
+    cursor = conexion.cursor()
+
+    cursor.execute("SELECT id FROM configuracion LIMIT 1")
+    fila = cursor.fetchone()
+
+    if fila:
+        cursor.execute("""
+            UPDATE configuracion
+            SET correo_respaldo = ?
+            WHERE id = ?
+        """, (correo, fila[0]))
+    else:
+        cursor.execute("""
+            INSERT INTO configuracion (correo_respaldo)
+            VALUES (?)
+        """, (correo,))
+
+    conexion.commit()
+    conexion.close()
+
+@app.route("/configuracion/respaldo", methods=["GET", "POST"])
+def configuracion_respaldo():
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    if session.get("permiso_configuracion") != 1 and session.get("rol") != "admin":
+        return "No tienes permiso para acceder a Respaldo"
+
+    mensaje = ""
+    correo_respaldo = obtener_correo_respaldo()
+
+    if request.method == "POST":
+        correo_respaldo = request.form["correo_respaldo"].strip()
+
+        if correo_respaldo == "":
+            mensaje = "Debes escribir un correo"
+        else:
+            guardar_correo_respaldo(correo_respaldo)
+            mensaje = "Correo de respaldo guardado correctamente"
+
+        correo_respaldo = obtener_correo_respaldo()
+
+    return render_template(
+        "configuracion_respaldo.html",
+        correo_respaldo=correo_respaldo,
+        mensaje=mensaje
+    )
+
+def enviar_respaldo_por_correo():
+    correo_destino = obtener_correo_respaldo()
+
+    if not correo_destino:
+        return False, "No hay correo de respaldo configurado"
+
+    carpeta = "respaldos"
+
+    if not os.path.exists(carpeta):
+        os.makedirs(carpeta)
+
+    fecha = datetime.now().strftime("%Y%m%d_%H%M%S")
+    archivo_respaldo = os.path.join(carpeta, f"backup_pos_{fecha}.db")
+
+    shutil.copy("pos.db", archivo_respaldo)
+
+    remitente = "mlosmaestros@gmail.com"
+    clave_app = "gtnc nrmj fxng lpyi"
+
+    msg = EmailMessage()
+    msg["Subject"] = "Respaldo automático del sistema POS"
+    msg["From"] = remitente
+    msg["To"] = correo_destino
+    msg.set_content("Adjunto respaldo de la base de datos del sistema POS.")
+
+    with open(archivo_respaldo, "rb") as f:
+        msg.add_attachment(
+            f.read(),
+            maintype="application",
+            subtype="octet-stream",
+            filename=os.path.basename(archivo_respaldo)
+        )
+
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+            smtp.login(remitente, clave_app)
+            smtp.send_message(msg)
+
+        return True, f"Respaldo enviado correctamente a {correo_destino}"
+
+    except Exception as e:
+        return False, f"Error al enviar respaldo: {str(e)}"
+
+
+@app.route("/enviar_respaldo")
+def enviar_respaldo():
+
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    ok, mensaje = enviar_respaldo_por_correo()
+
+    correo_respaldo = obtener_correo_respaldo()
+
+    return render_template(
+        "configuracion_respaldo.html",
+        correo_respaldo=correo_respaldo,
+        mensaje=mensaje
+    )
+
 def generar_inventario_pdf():
     carpeta = "facturas"
 
@@ -989,6 +1141,9 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
+
+
+crear_tabla_configuracion()
 
 if __name__ == "__main__":
     app.run(debug=True)
