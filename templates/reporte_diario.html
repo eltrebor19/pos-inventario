@@ -5,7 +5,7 @@
     <title>Reportes</title>
     <style>
         body{
-            font-family:Arial;
+            font-family: Arial, sans-serif;
             background:#f4f6f8;
             margin:0;
             padding:20px;
@@ -141,7 +141,7 @@
 
         <div class="tarjeta">
             <h3>Ingresos</h3>
-            <div class="valor">RD$ {{ "%.2f"|format(total_ingresos) }}</div>
+            <div class="valor">RD$ {{ "%.2f"|format(total_ingresos|float) }}</div>
         </div>
     </div>
 
@@ -152,12 +152,18 @@
                 <th>Producto</th>
                 <th>Cantidad vendida</th>
             </tr>
-            {% for producto in productos_mas_vendidos %}
-            <tr>
-                <td>{{ producto[0] }}</td>
-                <td>{{ producto[1] }}</td>
-            </tr>
-            {% endfor %}
+            {% if productos_mas_vendidos %}
+                {% for producto in productos_mas_vendidos %}
+                <tr>
+                    <td>{{ producto[0] }}</td>
+                    <td>{{ producto[1] }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="2">No hay productos vendidos.</td>
+                </tr>
+            {% endif %}
         </table>
     </div>
 
@@ -171,14 +177,13 @@
 
         <table>
             <tr>
-                <th>ID</th>
-                <th>Producto</th>
+                <th>Factura</th>
+                <th>Productos</th>
                 <th>Cliente</th>
                 <th>Cantidad</th>
-                <th>Precio</th>
                 <th>Total</th>
                 <th>Fecha</th>
-                <th>Factura</th>
+                <th>Factura PDF</th>
             </tr>
 
             {% if ventas_dia %}
@@ -188,11 +193,10 @@
                     <td>{{ venta[1] }}</td>
                     <td>{{ venta[2] }}</td>
                     <td>{{ venta[3] }}</td>
-                    <td>RD$ {{ "%.2f"|format(venta[4]) }}</td>
-                    <td>RD$ {{ "%.2f"|format(venta[5]) }}</td>
-                    <td>{{ venta[6] }}</td>
+                    <td>RD$ {{ "%.2f"|format(venta[4]|float) }}</td>
+                    <td>{{ venta[5] }}</td>
                     <td>
-                        <a class="btn-factura" href="{{ url_for('ver_factura', venta_id=venta[0]) }}" target="_blank">
+                        <a class="btn-factura" href="{{ url_for('ver_factura', factura_id=venta[0]) }}" target="_blank">
                             Ver factura
                         </a>
                     </td>
@@ -200,20 +204,20 @@
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td colspan="8">No hay ventas registradas para esta fecha.</td>
+                    <td colspan="7">No hay ventas registradas para esta fecha.</td>
                 </tr>
             {% endif %}
         </table>
 
         <div class="total-dia">
-            Total vendido del día: RD$ {{ "%.2f"|format(total_dia) }}
+            Total vendido del día: RD$ {{ "%.2f"|format(total_dia|float) }}
         </div>
     </div>
 
-   <div style="margin-top:20px; display:flex; gap:10px;">
-    <a class="volver" href="{{ url_for('imprimir_inventario_pdf') }}" target="_blank">🖨 Imprimir inventario PDF</a>
-    <a class="volver" href="/panel">Volver al panel</a>
-</div>>
+    <div style="margin-top:20px; display:flex; gap:10px;">
+        <a class="volver" href="{{ url_for('imprimir_inventario_pdf') }}" target="_blank">🖨 Imprimir inventario PDF</a>
+        <a class="volver" href="/panel">Volver al panel</a>
+    </div>
 </div>
 
 </body>

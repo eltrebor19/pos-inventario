@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Devoluciones pendientes</title>
+    <style>
+        body{
+            font-family:Arial;
+            background:#f4f6f8;
+            margin:0;
+            padding:20px;
+        }
+
+        .contenedor{
+            max-width:1200px;
+            margin:auto;
+            background:white;
+            padding:20px;
+            border-radius:12px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h1{
+            text-align:center;
+            color:#1f4e79;
+            margin-top:0;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            margin-top:20px;
+        }
+
+        th, td{
+            border:1px solid #ccc;
+            padding:10px;
+            text-align:center;
+        }
+
+        th{
+            background:#1f4e79;
+            color:white;
+        }
+
+        .btn-aprobar{
+            text-decoration:none;
+            color:white;
+            background:#198754;
+            padding:8px 10px;
+            border-radius:6px;
+            display:inline-block;
+        }
+
+        .btn-rechazar{
+            text-decoration:none;
+            color:white;
+            background:#dc3545;
+            padding:8px 10px;
+            border-radius:6px;
+            display:inline-block;
+        }
+
+        .sin-datos{
+            text-align:center;
+            padding:20px;
+            color:#666;
+        }
+    </style>
+</head>
+<body>
+
+<div class="contenedor">
+    <h1>Devoluciones pendientes</h1>
+
+    {% if devoluciones %}
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Factura</th>
+            <th>Producto</th>
+            <th>Cliente</th>
+            <th>Cantidad</th>
+            <th>Motivo</th>
+            <th>Solicitado por</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+        </tr>
+
+        {% for d in devoluciones %}
+        <tr>
+            <td>{{ d[0] }}</td>
+            <td>{{ d[1] }}</td>
+            <td>{{ d[3] }}</td>
+            <td>{{ d[4] }}</td>
+            <td>{{ d[5] }}</td>
+            <td>{{ d[6] }}</td>
+            <td>{{ d[7] }}</td>
+            <td>{{ d[8] }}</td>
+            <td>
+                <a class="btn-aprobar" href="/aprobar_devolucion/{{ d[0] }}">Confirmar</a>
+                <a class="btn-rechazar" href="/rechazar_devolucion/{{ d[0] }}">Rechazar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <div class="sin-datos">No hay devoluciones pendientes.</div>
+    {% endif %}
+</div>
+
+</body>
+</html>

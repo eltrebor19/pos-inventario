@@ -6,191 +6,504 @@
 
 <style>
 body{
-font-family:Arial;
-background:#f4f6f8;
-margin:0;
-padding:20px;
+    font-family: Arial, sans-serif;
+    background:#f2f2f2;
+    margin:0;
+    padding:20px;
 }
 
 .contenedor{
-width:1000px;
-margin:auto;
-background:white;
-padding:20px;
-border-radius:12px;
-box-shadow:0 4px 12px rgba(0,0,0,0.1);
+    max-width:1250px;
+    margin:auto;
+    background:#ffffff;
+    border-radius:14px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.08);
+    padding:18px;
 }
 
-h1,h2{
-text-align:center;
-color:#1f4e79;
+h1{
+    text-align:center;
+    color:#1f4e79;
+    margin-top:0;
+    margin-bottom:20px;
 }
 
-form{
-display:grid;
-grid-template-columns:2fr 2fr 2fr 1fr auto;
-gap:10px;
-margin-bottom:20px;
+.barra-superior{
+    display:grid;
+    grid-template-columns: 2fr 1fr auto auto;
+    gap:10px;
+    margin-bottom:15px;
 }
 
-select,input,button{
-padding:10px;
+input, select, button, textarea{
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #d0d0d0;
+    font-size:14px;
+    box-sizing:border-box;
 }
 
 button{
-background:#1f4e79;
-color:white;
-border:none;
-border-radius:6px;
-cursor:pointer;
+    border:none;
+    cursor:pointer;
+    font-weight:bold;
 }
 
-table{
-width:100%;
-border-collapse:collapse;
-margin-top:20px;
+.btn-agregar{
+    background:#6ec1f3;
+    color:white;
 }
 
-th,td{
-border:1px solid #ccc;
-padding:10px;
-text-align:center;
-}
-
-th{
-background:#1f4e79;
-color:white;
+.btn-consultar{
+    background:#e9f3fb;
+    color:#1f4e79;
+    border:1px solid #b9d8ee;
 }
 
 .mensaje{
-text-align:center;
-font-weight:bold;
-color:green;
-margin-top:10px;
+    text-align:center;
+    font-weight:bold;
+    color:#198754;
+    margin:10px 0;
 }
 
-.total{
-text-align:right;
-font-size:20px;
-margin-top:20px;
-color:#1f4e79;
-font-weight:bold;
+.precio-consulta{
+    background:#fff8dd;
+    border:1px solid #ecd58c;
+    color:#8a6d1d;
+    padding:10px;
+    border-radius:8px;
+    margin-bottom:15px;
+    text-align:center;
+    font-weight:bold;
 }
 
-.volver{
-display:inline-block;
-margin-top:20px;
-background:#1f4e79;
-color:white;
-padding:10px 15px;
-border-radius:6px;
-text-decoration:none;
+.tabla-area{
+    background:#f7f7f7;
+    border:1px solid #d8d8d8;
+    border-radius:12px;
+    overflow:hidden;
+    min-height:260px;
 }
 
-.btn-descargar{
-display:inline-block;
-background:#0d6efd;
-color:white;
-padding:8px 10px;
-border-radius:6px;
-text-decoration:none;
-margin:2px;
-font-size:13px;
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#efefef;
+    color:#4c4c4c;
+    font-size:13px;
+    padding:10px;
+    text-align:center;
+    border-bottom:1px solid #d9d9d9;
+}
+
+td{
+    padding:10px;
+    text-align:center;
+    border-bottom:1px solid #e6e6e6;
+    background:white;
+}
+
+.btn-mini{
+    padding:6px 10px;
+    border-radius:6px;
+    font-size:12px;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+.btn-editar{
+    background:#0d6efd;
+}
+
+.btn-eliminar{
+    background:#6c757d;
+}
+
+.info-inferior{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    margin-top:18px;
+    flex-wrap:wrap;
+    gap:15px;
+}
+
+.tags{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.tag{
+    background:#fff8dd;
+    border:1px solid #e7d18f;
+    color:#8b6b0d;
+    padding:8px 14px;
+    border-radius:8px;
+    font-weight:bold;
+    font-size:14px;
+}
+
+.total-box{
+    text-align:right;
+}
+
+.total-label{
+    font-size:20px;
+    color:#ff5a2f;
+    font-weight:bold;
+}
+
+.total-monto{
+    font-size:44px;
+    color:#ff5a2f;
+    font-weight:bold;
+}
+
+.botones-abajo{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:16px;
+    flex-wrap:wrap;
+}
+
+.btn-cancelar{
+    background:#e9ecef;
+    color:#333;
+    border:1px solid #ced4da;
 }
 
 .btn-imprimir{
-display:inline-block;
-background:#198754;
-color:white;
-padding:8px 10px;
-border-radius:6px;
-text-decoration:none;
-margin:2px;
-font-size:13px;
+    background:#ffffff;
+    color:#1f4e79;
+    border:1px solid #b9d8ee;
+    text-decoration:none;
+    padding:10px 14px;
+    border-radius:8px;
+    display:inline-block;
+}
+
+.btn-historial{
+    background:#0d6efd;
+    color:white;
+}
+
+.btn-cobrar{
+    background:#0d6efd;
+    color:white;
+}
+
+.bloque-cliente{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:10px;
+    margin-top:15px;
+}
+
+.historial{
+    margin-top:25px;
+    background:white;
+    border:1px solid #ddd;
+    border-radius:12px;
+    padding:15px;
+}
+
+.historial h2{
+    text-align:center;
+    color:#1f4e79;
+    margin-top:0;
+}
+
+.sin-datos{
+    text-align:center;
+    color:#777;
+    padding:20px;
+}
+
+.inline-form{
+    margin:0;
+    display:inline-block;
+}
+
+.fila-pendiente td{
+    background:#ffd9d9 !important;
+    color:#8b0000;
+    font-weight:bold;
+}
+
+.fila-confirmada td{
+    background:#dff6df !important;
+}
+
+.fila-rechazada td{
+    background:#ededed !important;
+    color:#666;
+}
+
+.buscador-historial{
+    display:grid;
+    grid-template-columns:1fr 1fr auto;
+    gap:10px;
+    margin-bottom:15px;
+}
+
+.acciones-factura a,
+.acciones-factura button{
+    margin:2px;
+}
+
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.45);
+    z-index:9999;
+}
+
+.modal-contenido{
+    width:520px;
+    max-width:90%;
+    background:white;
+    margin:70px auto;
+    padding:20px;
+    border-radius:14px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.2);
+}
+
+textarea{
+    width:100%;
+    min-height:90px;
+    resize:vertical;
 }
 </style>
 </head>
-
 <body>
 
 <div class="contenedor">
+    <h1>Módulo de Ventas</h1>
 
-<h1>Módulo de Ventas</h1>
+    {% if mensaje %}
+    <div class="mensaje">{{ mensaje }}</div>
+    {% endif %}
 
-<form method="POST">
+    {% if precio_consultado is not none %}
+    <div class="precio-consulta">
+        Precio de <strong>{{ nombre_precio }}</strong>: RD$ {{ "%.2f"|format(precio_consultado) }}
+    </div>
+    {% endif %}
 
-<select name="producto_id" required>
-<option value="">Seleccione un producto</option>
-{% for producto in productos %}
-<option value="{{ producto[0] }}">
-{{ producto[1] }} - Precio: {{ producto[2] }} - Stock: {{ producto[3] }}
-</option>
-{% endfor %}
-</select>
+    <form method="POST" class="barra-superior">
+        <div>
+            <input
+                type="text"
+                name="producto_buscar"
+                list="lista_productos"
+                placeholder="Buscar producto por nombre"
+                autocomplete="off"
+                required
+                style="width:100%;"
+            >
+            <datalist id="lista_productos">
+                {% for producto in productos %}
+                <option value="{{ producto[1] }}">
+                {% endfor %}
+            </datalist>
+        </div>
 
-<select name="cliente_id">
-<option value="">Seleccione un cliente de la lista</option>
-{% for cliente in clientes %}
-<option value="{{ cliente[0] }}">
-{{ cliente[1] }}
-</option>
-{% endfor %}
-</select>
+        <input type="number" name="cantidad" value="1" min="1" required>
 
-<input type="text" name="cliente_nombre_manual" placeholder="O escriba el nombre del cliente">
+        <button type="submit" name="accion" value="agregar" class="btn-agregar">Agregar</button>
+        <button type="button" class="btn-consultar" onclick="abrirModalPrecio()">Consultar precio</button>
+    </form>
 
-<input type="number" name="cantidad" placeholder="Cantidad" required min="1">
+    <div id="modalPrecio" class="modal">
+        <div class="modal-contenido">
+            <h3 style="margin-top:0; color:#1f4e79; text-align:center;">Consultar precio</h3>
 
-<button type="submit">Vender</button>
+            <form method="POST">
+                <input
+                    type="text"
+                    name="producto_precio_buscar"
+                    list="lista_productos_precio"
+                    placeholder="Escriba el nombre del producto"
+                    style="width:100%; margin-bottom:12px;"
+                    required
+                >
 
-</form>
+                <datalist id="lista_productos_precio">
+                    {% for producto in productos %}
+                    <option value="{{ producto[1] }}">
+                    {% endfor %}
+                </datalist>
 
-{% if mensaje %}
-<div class="mensaje">{{ mensaje }}</div>
-{% endif %}
+                <div style="display:flex; gap:10px; justify-content:flex-end;">
+                    <button type="button" onclick="cerrarModalPrecio()" class="btn-cancelar">Cerrar</button>
+                    <button type="submit" name="accion" value="consultar_precio" class="btn-consultar">Buscar precio</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-<h2>Historial de Ventas</h2>
+    <div class="tabla-area" style="margin-top:15px;">
+        {% if carrito %}
+        <table>
+            <tr>
+                <th>Descripción</th>
+                <th>Precio unitario</th>
+                <th>Cantidad</th>
+                <th>Unidad</th>
+                <th>Importe</th>
+                <th>Modificar</th>
+                <th>Eliminar artículo</th>
+            </tr>
 
-<table>
-<tr>
-<th>ID</th>
-<th>Producto</th>
-<th>Cliente</th>
-<th>Cantidad</th>
-<th>Precio</th>
-<th>Total</th>
-<th>Acciones</th>
-</tr>
+            {% for item in carrito %}
+            <tr>
+                <td>{{ item.descripcion }}</td>
+                <td>RD$ {{ "%.2f"|format(item.precio_unitario) }}</td>
+                <td>{{ item.cantidad }}</td>
+                <td>{{ item.unidad }}</td>
+                <td>RD$ {{ "%.2f"|format(item.importe) }}</td>
+                <td>
+                    <form method="POST" class="inline-form">
+                        <input type="hidden" name="accion" value="modificar">
+                        <input type="hidden" name="indice" value="{{ loop.index0 }}">
+                        <input type="number" name="nueva_cantidad" value="{{ item.cantidad }}" min="1" style="width:75px;">
+                        <button type="submit" class="btn-mini btn-editar">Modificar</button>
+                    </form>
+                </td>
+                <td>
+                    <form method="POST" class="inline-form">
+                        <input type="hidden" name="accion" value="eliminar">
+                        <input type="hidden" name="indice" value="{{ loop.index0 }}">
+                        <button type="submit" class="btn-mini btn-eliminar">Eliminar artículo</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <div class="sin-datos">No hay productos agregados a la cotización.</div>
+        {% endif %}
+    </div>
 
-{% for venta in historial %}
-<tr>
-<td>{{ venta[0] }}</td>
-<td>{{ venta[2] }}</td>
-<td>{{ venta[7] }}</td>
-<td>{{ venta[3] }}</td>
-<td>RD$ {{ venta[4] }}</td>
-<td>RD$ {{ venta[5] }}</td>
-<td>
-<a class="btn-descargar" href="{{ url_for('descargar_factura', venta_id=venta[0]) }}">
-Descargar
-</a>
+    <form method="POST">
+        <div class="bloque-cliente">
+            <select name="cliente_id">
+                <option value="">Seleccione un cliente</option>
+                {% for cliente in clientes %}
+                <option value="{{ cliente[0] }}">{{ cliente[1] }}</option>
+                {% endfor %}
+            </select>
 
-<a class="btn-imprimir" href="{{ url_for('ver_factura', venta_id=venta[0]) }}" target="_blank">
-Imprimir
-</a>
-</td>
-</tr>
-{% endfor %}
+            <input type="text" name="cliente_nombre_manual" placeholder="O escribir el nombre del cliente">
+        </div>
 
-</table>
+        <div class="info-inferior">
+            <div class="tags">
+                <div class="tag">CAJA-01</div>
+                <div class="tag">{{ total_articulos }} Artículos</div>
+                <div class="tag">Cliente</div>
+            </div>
 
-<div class="total">
-Total vendido: {{ total_vendido }}
+            <div class="total-box">
+                <div class="total-label">Total</div>
+                <div class="total-monto">RD$ {{ "%.2f"|format(total_carrito) }}</div>
+            </div>
+        </div>
+
+        <div class="botones-abajo">
+            <button type="submit" name="accion" value="cancelar" class="btn-cancelar">Cancelar</button>
+            <a href="{{ url_for('imprimir_cotizacion') }}" target="_blank" class="btn-imprimir">Imprimir cotización</a>
+            <button type="button" class="btn-historial" onclick="toggleHistorial()">Buscar venta</button>
+            <button type="submit" name="accion" value="cobrar" class="btn-cobrar">Cobrar</button>
+        </div>
+    </form>
+
+    <div class="historial" id="historial" style="display:none;">
+        <h2>Historial de ventas</h2>
+
+        <form method="GET" class="buscador-historial">
+            <input type="text" name="buscar_id" placeholder="Buscar factura por ID" value="{{ buscar_id }}">
+            <input type="text" name="buscar_cliente" placeholder="Buscar por cliente" value="{{ buscar_cliente }}">
+            <button type="submit" class="btn-consultar">Buscar</button>
+        </form>
+
+        {% if historial %}
+        <table>
+            <tr>
+                <th>Factura</th>
+                <th>Productos</th>
+                <th>Cliente</th>
+                <th>Cantidad total</th>
+                <th>Total factura</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Factura PDF</th>
+                <th>Devolución</th>
+            </tr>
+
+            {% for venta in historial %}
+            <tr class="
+                {% if venta[6] == 'pendiente' %}fila-pendiente{% endif %}
+                {% if venta[6] == 'confirmada' %}fila-confirmada{% endif %}
+                {% if venta[6] == 'rechazada' %}fila-rechazada{% endif %}
+            ">
+                <td>{{ venta[0] }}</td>
+                <td>{{ venta[1] }}</td>
+                <td>{{ venta[2] if venta[2] else "Consumidor final" }}</td>
+                <td>{{ venta[3] }}</td>
+                <td>RD$ {{ "%.2f"|format(venta[4]) }}</td>
+                <td>{{ venta[5] }}</td>
+                <td>
+                    {% if venta[6] == 'pendiente' %}
+                        Devolución pendiente
+                    {% elif venta[6] == 'confirmada' %}
+                        Devolución confirmada
+                    {% elif venta[6] == 'rechazada' %}
+                        Devolución rechazada
+                    {% else %}
+                        Normal
+                    {% endif %}
+                </td>
+                <td class="acciones-factura">
+                    <a href="{{ url_for('ver_factura', factura_id=venta[0]) }}" target="_blank" class="btn-imprimir">Ver</a>
+                    <a href="{{ url_for('descargar_factura', factura_id=venta[0]) }}" class="btn-imprimir">Descargar</a>
+                </td>
+                <td>
+                    <a href="{{ url_for('detalle_factura', factura_id=venta[0]) }}">
+                        <button type="button" class="btn-mini btn-editar">Solicitar devolución</button>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <div class="sin-datos">No se encontraron ventas.</div>
+        {% endif %}
+    </div>
 </div>
 
-<a class="volver" href="/panel">Volver al panel</a>
+<script>
+function abrirModalPrecio() {
+    document.getElementById("modalPrecio").style.display = "block";
+}
 
-</div>
+function cerrarModalPrecio() {
+    document.getElementById("modalPrecio").style.display = "none";
+}
+
+function toggleHistorial() {
+    const h = document.getElementById("historial");
+    h.style.display = (h.style.display === "none") ? "block" : "none";
+}
+</script>
 
 </body>
 </html>

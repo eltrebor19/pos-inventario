@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle de Factura</title>
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+            background:#f4f6f8;
+            margin:0;
+            padding:20px;
+        }
+
+        .contenedor{
+            width:1100px;
+            margin:auto;
+            background:white;
+            padding:20px;
+            border-radius:16px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h1{
+            text-align:center;
+            color:#1f4e79;
+            margin-bottom:25px;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        th, td{
+            border:1px solid #ccc;
+            padding:10px;
+            text-align:center;
+            vertical-align:middle;
+        }
+
+        th{
+            background:#1f4e79;
+            color:white;
+        }
+
+        input, textarea, button{
+            width:100%;
+            box-sizing:border-box;
+            padding:10px;
+            margin-bottom:8px;
+            border:1px solid #ccc;
+            border-radius:6px;
+            font-size:14px;
+        }
+
+        textarea{
+            resize:vertical;
+            min-height:70px;
+        }
+
+        .btn{
+            background:#0d6efd;
+            color:white;
+            border:none;
+            cursor:pointer;
+            font-weight:bold;
+        }
+
+        .btn:hover{
+            background:#0b5ed7;
+        }
+
+        .estado{
+            font-weight:bold;
+            padding:8px 10px;
+            border-radius:8px;
+            display:inline-block;
+        }
+
+        .pendiente{
+            background:#fff3cd;
+            color:#856404;
+        }
+
+        .confirmada{
+            background:#d1e7dd;
+            color:#0f5132;
+        }
+
+        .rechazada{
+            background:#f8d7da;
+            color:#842029;
+        }
+
+        .sin-devolucion{
+            color:#666;
+            font-weight:bold;
+        }
+
+        .volver{
+            display:inline-block;
+            margin-top:20px;
+            background:#6c757d;
+            color:white;
+            padding:10px 16px;
+            border-radius:6px;
+            text-decoration:none;
+        }
+
+        .volver:hover{
+            background:#5c636a;
+        }
+    </style>
+</head>
+<body>
+
+<div class="contenedor">
+    <h1>Detalle de Factura #{{ factura_id }}</h1>
+
+    <table>
+        <tr>
+            <th>ID venta</th>
+            <th>Producto</th>
+            <th>Cantidad vendida</th>
+            <th>Precio</th>
+            <th>Total</th>
+            <th>Cliente</th>
+            <th>Fecha</th>
+            <th>Devolución</th>
+        </tr>
+
+        {% for item in detalles %}
+        <tr>
+            <td>{{ item[0] }}</td>
+            <td>{{ item[2] }}</td>
+            <td>{{ item[3] }}</td>
+            <td>RD$ {{ "%.2f"|format(item[4]|float) }}</td>
+            <td>RD$ {{ "%.2f"|format(item[5]|float) }}</td>
+            <td>{{ item[6] }}</td>
+            <td>{{ item[7] }}</td>
+            <td>
+                {% if item[8] == 'pendiente' %}
+                    <div class="estado pendiente">
+                        Devolución pendiente<br>
+                        Cantidad: {{ item[9] }}
+                    </div>
+                {% elif item[8] == 'confirmada' %}
+                    <div class="estado confirmada">
+                        Devolución confirmada<br>
+                        Cantidad: {{ item[9] }}
+                    </div>
+                {% elif item[8] == 'rechazada' %}
+                    <form method="POST" action="{{ url_for('solicitar_devolucion') }}">
+                        <input type="hidden" name="venta_id" value="{{ item[0] }}">
+                        <input type="hidden" name="producto_id" value="{{ item[1] }}">
+                        <input type="hidden" name="nombre_producto" value="{{ item[2] }}">
+                        <input type="hidden" name="cliente_nombre" value="{{ item[6] }}">
+
+                        <input type="number" name="cantidad" min="1" max="{{ item[3] }}" placeholder="Cantidad a devolver" required>
+                        <textarea name="motivo" placeholder="Motivo de la devolución" required></textarea>
+                        <button type="submit" class="btn">Solicitar devolución</button>
+                    </form>
+                    <div class="estado rechazada" style="margin-top:8px;">
+                        La devolución anterior fue rechazada
+                    </div>
+                {% else %}
+                    <form method="POST" action="{{ url_for('solicitar_devolucion') }}">
+                        <input type="hidden" name="venta_id" value="{{ item[0] }}">
+                        <input type="hidden" name="producto_id" value="{{ item[1] }}">
+                        <input type="hidden" name="nombre_producto" value="{{ item[2] }}">
+                        <input type="hidden" name="cliente_nombre" value="{{ item[6] }}">
+
+                        <input type="number" name="cantidad" min="1" max="{{ item[3] }}" placeholder="Cantidad a devolver" required>
+                        <textarea name="motivo" placeholder="Motivo de la devolución" required></textarea>
+                        <button type="submit" class="btn">Solicitar devolución</button>
+                    </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <a class="volver" href="{{ url_for('ventas') }}">Volver</a>
+</div>
+
+</body>
+</html>

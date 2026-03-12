@@ -1,9 +1,120 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
+import shutil
+import smtplib
+from email.message import EmailMessage
 
 app = Flask(__name__)
 app.secret_key = "mi_clave_secreta_2026"
 
+def crear_tabla_configuracion():
+    conexion = sqlite3.connect("pos.db")
+    cursor = conexion.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS configuracion (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            correo_respaldo TEXT
+        )
+    """)
+
+    cursor.execute("SELECT COUNT(*) FROM configuracion")
+    existe = cursor.fetchone()[0]
+
+    if existe == 0:
+        cursor.execute("""
+            INSERT INTO configuracion (correo_respaldo)
+            VALUES (?)
+        """, ("respaldo@correo.com",))
+
+    conexion.commit()
+    conexion.close()
+
+
+def obtener_correo_respaldo():
+    conexion = sqlite3.connect("pos.db")
+    cursor = conexion.cursor()
+
+    cursor.execute("SELECT correo_respaldo FROM configuracion LIMIT 1")
+    fila = cursor.fetchone()
+
+    conexion.close()
+
+    if fila:
+        return fila[0]
+    return ""
+
+
+def guardar_correo_respaldo(correo):
+    conexion = sqlite3.connect("pos.db")
+    cursor = conexion.cursor()
+
+    cursor.execute("SELECT id FROM configuracion LIMIT 1")
+    fila = cursor.fetchone()
+
+    if fila:
+        cursor.execute("""
+            UPDATE configuracion
+            SET correo_respaldo = ?
+            WHERE id = ?
+        """, (correo, fila[0]))
+    else:
+        cursor.execute("""
+            INSERT INTO configuracion (correo_respaldo)
+            VALUES (?)
+        """, (correo,))
+
+    conexion.commit()
+    conexion.close()
+
+
+def crear_respaldo():
+    carpeta = "respaldos"
+
+    if not os.path.exists(carpeta):
+        os.makedirs(carpeta)
+
+    fecha = datetime.now().strftime("%Y%m%d_%H%M%S")
+    archivo_respaldo = os.path.join(carpeta, f"backup_pos_{fecha}.db")
+
+    shutil.copy("pos.db", archivo_respaldo)
+
+    return archivo_respaldo
+
+
+def enviar_respaldo_por_correo():
+    correo_destino = obtener_correo_respaldo()
+
+    if not correo_destino:
+        return False, "No hay correo de respaldo configurado"
+
+    archivo_respaldo = crear_respaldo()
+
+    remitente = "tucorreo@gmail.com"
+    clave_app = "TU_CLAVE_DE_APLICACION"
+
+    msg = EmailMessage()
+    msg["Subject"] = "Respaldo automático de tu sistema POS"
+    msg["From"] = remitente
+    msg["To"] = correo_destino
+    msg.set_content("Adjunto encontrarás el respaldo de la base de datos del punto de venta.")
+
+    with open(archivo_respaldo, "rb") as f:
+        msg.add_attachment(
+            f.read(),
+            maintype="application",
+            subtype="octet-stream",
+            filename=os.path.basename(archivo_respaldo)
+        )
+
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+            smtp.login(remitente, clave_app)
+            smtp.send_message(msg)
+
+        return True, f"Respaldo enviado correctamente a {correo_destino}"
+    except Exception as e:
+        return False, f"Error al enviar el respaldo: {str(e)}"
 
 def crear_bd():
     conexion = sqlite3.connect("pos.db")
@@ -280,14 +391,59 @@ def reportes():
         total_ingresos=total_ingresos,
         productos_mas_vendidos=productos_mas_vendidos
     )
+@app.route("/configuracion/respaldo", methods=["GET", "POST"])
+def configuracion_respaldo():
+    if "usuario" not in session:
+        return redirect(url_for("login"))
 
+    if session.get("permiso_configuracion") != 1 and session.get("rol") != "admin":
+        return "No tienes permiso para acceder a Respaldo"
+
+    mensaje = ""
+    correo_respaldo = obtener_correo_respaldo()
+
+    if request.method == "POST":
+        correo_respaldo = request.form["correo_respaldo"].strip()
+
+        if correo_respaldo == "":
+            mensaje = "Debes escribir un correo"
+        else:
+            guardar_correo_respaldo(correo_respaldo)
+            mensaje = "Correo de respaldo guardado correctamente"
+
+    correo_respaldo = obtener_correo_respaldo()
+
+    return render_template(
+        "configuracion_respaldo.html",
+        correo_respaldo=correo_respaldo,
+        mensaje=mensaje
+    )
+
+@app.route("/enviar_respaldo")
+def enviar_respaldo():
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    if session.get("permiso_configuracion") != 1 and session.get("rol") != "admin":
+        return "No tienes permiso para enviar respaldos"
+
+    ok, mensaje = enviar_respaldo_por_correo()
+
+    correo_respaldo = obtener_correo_respaldo()
+
+    return render_template(
+        "configuracion_respaldo.html",
+        correo_respaldo=correo_respaldo,
+        mensaje=mensaje
+    )
 
 @app.route("/logout")
 def logout():
-    session.pop("usuario", None)
+    session.clear()
     return redirect(url_for("login"))
 
 
+crear_tabla_configuracion()
+
 if __name__ == "__main__":
-    crear_bd()
     app.run(debug=True)

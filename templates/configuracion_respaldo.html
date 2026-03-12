@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Respaldo del sistema</title>
+    <style>
+        body{
+            font-family:Arial;
+            background:#f4f6f8;
+            margin:0;
+            padding:20px;
+        }
+
+        .contenedor{
+            max-width:800px;
+            margin:auto;
+            background:white;
+            padding:25px;
+            border-radius:12px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        h1{
+            text-align:center;
+            color:#1f4e79;
+        }
+
+        form{
+            display:grid;
+            gap:15px;
+            margin-top:20px;
+        }
+
+        input{
+            padding:12px;
+            border:1px solid #ccc;
+            border-radius:8px;
+            font-size:15px;
+        }
+
+        button, .btn-enviar, .volver{
+            display:inline-block;
+            padding:12px 15px;
+            border:none;
+            border-radius:8px;
+            text-decoration:none;
+            text-align:center;
+            cursor:pointer;
+            color:white;
+        }
+
+        button{
+            background:#1f4e79;
+        }
+
+        .btn-enviar{
+            background:#198754;
+            margin-top:15px;
+        }
+
+        .volver{
+            background:#6c757d;
+            margin-top:15px;
+        }
+
+        .mensaje{
+            text-align:center;
+            margin-top:15px;
+            font-weight:bold;
+            color:#198754;
+        }
+
+        .correo-actual{
+            background:#eef4fa;
+            padding:12px;
+            border-radius:8px;
+            margin-top:15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="contenedor">
+        <h1>💾 Configuración de respaldo</h1>
+
+        <div class="correo-actual">
+            <strong>Correo actual de respaldo:</strong> {{ correo_respaldo }}
+        </div>
+
+        {% if mensaje %}
+            <div class="mensaje">{{ mensaje }}</div>
+        {% endif %}
+
+        <form method="POST">
+            <input type="email" name="correo_respaldo" value="{{ correo_respaldo }}" placeholder="Correo para recibir el respaldo" required>
+            <button type="submit">Guardar correo de respaldo</button>
+        </form>
+
+        <a class="btn-enviar" href="{{ url_for('enviar_respaldo') }}">Enviar respaldo ahora</a>
+        <br>
+        <a class="volver" href="{{ url_for('configuracion') }}" target="contenido">Volver</a>
+    </div>
+</body>
+</html>

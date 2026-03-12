@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Seguridad del Sistema</title>
+    <style>
+        body{
+            font-family:Arial;
+            background:#f4f6f8;
+            margin:0;
+            padding:20px;
+        }
+
+        .contenedor{
+            width:900px;
+            margin:auto;
+            background:white;
+            padding:25px;
+            border-radius:12px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h1, h2{
+            text-align:center;
+            color:#1f4e79;
+        }
+
+        .bloque{
+            border:1px solid #ddd;
+            border-radius:12px;
+            padding:20px;
+            margin-top:25px;
+            background:#fafafa;
+        }
+
+        form{
+            display:grid;
+            gap:12px;
+        }
+
+        input, button{
+            padding:12px;
+            font-size:15px;
+            border-radius:8px;
+            border:1px solid #ccc;
+        }
+
+        button{
+            border:none;
+            cursor:pointer;
+            font-weight:bold;
+        }
+
+        .btn-guardar{
+            background:#198754;
+            color:white;
+        }
+
+        .btn-reset{
+            background:#dc3545;
+            color:white;
+        }
+
+        .mensaje{
+            text-align:center;
+            font-weight:bold;
+            color:green;
+            margin-bottom:15px;
+        }
+
+        .alerta{
+            color:#842029;
+            background:#f8d7da;
+            border:1px solid #f5c2c7;
+            padding:12px;
+            border-radius:8px;
+            margin-bottom:15px;
+            font-weight:bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="contenedor">
+    <h1>🔒 Seguridad del Sistema</h1>
+
+    {% if mensaje %}
+        <div class="mensaje">{{ mensaje }}</div>
+    {% endif %}
+
+    <div class="bloque">
+        <h2>Clave de reset del sistema</h2>
+
+       <form method="POST">
+    <input type="hidden" name="accion" value="guardar_clave_reset">
+
+    <input type="password" name="clave_actual" maxlength="16" placeholder="Clave actual de reset (si ya existe una)">
+    <input type="password" name="clave_reset" maxlength="16" placeholder="Escribe una clave nueva de 16 dígitos" required>
+    <input type="password" name="confirmar_clave_reset" maxlength="16" placeholder="Confirma la clave nueva de 16 dígitos" required>
+
+    <button type="submit" class="btn-guardar">Guardar clave de reset</button>
+</form>
+    </div>
+
+    <div class="bloque">
+        <h2>Reset del sistema completo</h2>
+
+        <div class="alerta">
+            Antes de borrar, el sistema enviará automáticamente un respaldo al correo configurado.
+            Solo si el respaldo se envía correctamente se realizará el borrado total.
+        </div>
+
+        <form method="POST" action="{{ url_for('reset_sistema_completo') }}" onsubmit="return confirm('Se enviará un respaldo al correo y luego se borrará todo el sistema. ¿Deseas continuar?');">
+            <input type="password" name="clave_reset_confirmacion" maxlength="16" placeholder="Digite la clave de reset de 16 dígitos" required>
+
+            <input type="text" name="texto_confirmacion" placeholder="Escribe exactamente: CONFIRMAR BORRADO TOTAL" required>
+
+            <button type="submit" class="btn-reset">Reset del sistema completo</button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

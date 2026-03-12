@@ -74,11 +74,15 @@
             <a class="btn-config" href="{{ url_for('configuracion_usuarios') }}" target="contenido">👥 Usuarios</a>
             <a class="btn-config proximo" href="#">🏢 Empresa</a>
             <a class="btn-config proximo" href="#">🧾 Impuestos</a>
-            <a class="btn-config proximo" href="#">💾 Respaldo</a>
-            <a class="btn-config proximo" href="#">🔒 Seguridad</a>
+            <a class="btn-config" href="{{ url_for('configuracion_respaldo') }}" target="contenido">💾 Respaldo</a>
+
+            <!-- ESTE ES EL BOTON NUEVO -->
+            <a class="btn-config" href="{{ url_for('configuracion_seguridad') }}" target="contenido">🔒 Seguridad</a>
+
             <a class="btn-config" href="{{ url_for('preferencias') }}" target="contenido">
-⚙ Preferencias
-</a>
+            ⚙ Preferencias
+            </a>
+        </div>
     </div>
 </div>
 
