@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Aplicaciones</title>
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+            background:#f4f6f8;
+            margin:0;
+            padding:20px;
+        }
+
+        .contenedor{
+            max-width:1000px;
+            margin:auto;
+            background:white;
+            padding:30px;
+            border-radius:15px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h1{
+            text-align:center;
+            color:#1f4e79;
+            margin-bottom:30px;
+        }
+
+        .grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+            gap:20px;
+        }
+
+        .card{
+            background:#f9fafb;
+            border:1px solid #ddd;
+            border-radius:12px;
+            padding:20px;
+            text-align:center;
+            box-shadow:0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .card h2{
+            margin-bottom:15px;
+            color:#1f4e79;
+        }
+
+        .btn{
+            display:inline-block;
+            padding:12px 20px;
+            background:#1f4e79;
+            color:white;
+            text-decoration:none;
+            border-radius:8px;
+            font-weight:bold;
+        }
+
+        .btn:hover{
+            background:#163a5c;
+        }
+
+        .volver{
+            display:block;
+            width:max-content;
+            margin:30px auto 0;
+            padding:12px 20px;
+            background:#6c757d;
+            color:white;
+            text-decoration:none;
+            border-radius:8px;
+        }
+
+        .volver:hover{
+            background:#545b62;
+        }
+    </style>
+</head>
+<body>
+    <div class="contenedor">
+        <h1>Aplicaciones</h1>
+
+        <div class="grid">
+
+    <div class="card">
+        <h2>Facebook</h2>
+        <a class="btn" href="https://www.facebook.com" target="_blank">Abrir Facebook</a>
+    </div>
+
+    <div class="card">
+        <h2>Instagram</h2>
+        <a class="btn" href="https://www.instagram.com" target="_blank">Abrir Instagram</a>
+    </div>
+
+    <div class="card">
+        <h2>Google</h2>
+        <a class="btn" href="https://www.google.com" target="_blank">Abrir Google</a>
+    </div>
+
+    <div class="card">
+        <h2>WhatsApp Web</h2>
+        <a class="btn" href="https://web.whatsapp.com" target="_blank">Abrir WhatsApp</a>
+    </div>
+
+</div>
+
+        <a class="volver" href="{{ url_for('panel') }}">Volver al panel</a>
+    </div>
+</body>
+</html>

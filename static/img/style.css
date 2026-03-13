@@ -1,0 +1,73 @@
+body{
+    font-family:Arial;
+    background:#f4f6f8;
+    margin:0;
+    padding:20px;
+}
+
+/* contenedor principal */
+.contenedor{
+    width:95%;
+    max-width:1200px;
+    margin:auto;
+}
+
+/* titulos */
+h1{
+    text-align:center;
+    color:#1f4e79;
+}
+
+/* inputs */
+input, select, textarea{
+    width:100%;
+    padding:10px;
+    margin-top:5px;
+    margin-bottom:10px;
+    box-sizing:border-box;
+}
+
+/* botones */
+button{
+    background:#1f4e79;
+    color:white;
+    border:none;
+    padding:10px 15px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+/* tablas */
+table{
+    width:100%;
+    border-collapse:collapse;
+    overflow-x:auto;
+}
+
+th, td{
+    border:1px solid #ccc;
+    padding:8px;
+    text-align:left;
+}
+
+/* adaptacion celular */
+@media (max-width:768px){
+
+body{
+    padding:10px;
+}
+
+h1{
+    font-size:20px;
+}
+
+table{
+    font-size:12px;
+}
+
+button{
+    width:100%;
+    margin-bottom:5px;
+}
+
+}

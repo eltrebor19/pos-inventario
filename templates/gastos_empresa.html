@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<title>Gastos de la Empresa</title>
+
+<style>
+body{
+    font-family:Arial;
+    background:#f4f6f8;
+    margin:0;
+    padding:20px;
+}
+
+.contenedor{
+    width:1100px;
+    max-width:100%;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+    color:#1f4e79;
+}
+
+form{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    margin-bottom:20px;
+}
+
+input, select, textarea{
+    width:100%;
+    padding:10px;
+    margin-top:5px;
+    margin-bottom:12px;
+    box-sizing:border-box;
+}
+
+button, .btn{
+    background:#1f4e79;
+    color:white;
+    padding:10px 15px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    text-decoration:none;
+    display:inline-block;
+}
+
+button:hover, .btn:hover{
+    background:#163a5c;
+}
+
+.filtros{
+    background:white;
+    padding:15px;
+    border-radius:10px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    margin-bottom:20px;
+}
+
+.tabla{
+    background:white;
+    padding:15px;
+    border-radius:10px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th, td{
+    border:1px solid #ccc;
+    padding:8px;
+    text-align:center;
+}
+
+th{
+    background:#1f4e79;
+    color:white;
+}
+
+tr.grupo{
+    background:#dbe9f6;
+    font-weight:bold;
+}
+
+tr.fila-gasto{
+    cursor:pointer;
+}
+
+tr.fila-gasto:hover{
+    background:#f2f8fd;
+}
+</style>
+
+<script>
+function abrirDetalle(id){
+    window.open("/gasto_detalle/" + id, "_blank");
+}
+</script>
+
+</head>
+<body>
+
+<div class="contenedor">
+    <h1>Gastos de la Empresa</h1>
+
+    <form method="POST">
+        <label>Tipo de gasto</label>
+        <select name="tipo_gasto">
+            <option>Luz</option>
+            <option>Internet</option>
+            <option>Combustible</option>
+            <option>Alquiler</option>
+            <option>Nómina</option>
+            <option>Compras pequeñas</option>
+            <option>Mantenimiento</option>
+        </select>
+
+        <label>Fecha de pago</label>
+        <input type="date" name="fecha_pago" required>
+
+        <label>Mes pagado</label>
+        <input type="text" name="mes_pagado">
+
+        <label>Monto</label>
+        <input type="number" step="0.01" name="monto" required>
+
+        <label>Referencia</label>
+        <input type="text" name="referencia">
+
+        <label>Empresa suplidora</label>
+        <input type="text" name="empresa_suplidora">
+
+        <label>Método de pago</label>
+        <select name="metodo_pago">
+            <option>Efectivo</option>
+            <option>Transferencia</option>
+            <option>Tarjeta</option>
+            <option>Otro</option>
+        </select>
+
+        <label>Estado</label>
+        <select name="estado">
+            <option>Pagado</option>
+            <option>Pendiente</option>
+            <option>Parcial</option>
+        </select>
+
+        <label>Observación</label>
+        <textarea name="observacion" rows="4"></textarea>
+
+        <button type="submit">Guardar gasto</button>
+    </form>
+
+    <div class="filtros">
+        <form method="GET">
+            <label>Buscar por fecha</label>
+            <input type="date" name="fecha_buscar" value="{{ fecha_buscar }}">
+
+            <label>Filtrar por tipo de gasto</label>
+            <select name="tipo_buscar">
+                <option value="">Todos</option>
+                <option value="Luz" {% if tipo_buscar == 'Luz' %}selected{% endif %}>Luz</option>
+                <option value="Internet" {% if tipo_buscar == 'Internet' %}selected{% endif %}>Internet</option>
+                <option value="Combustible" {% if tipo_buscar == 'Combustible' %}selected{% endif %}>Combustible</option>
+                <option value="Alquiler" {% if tipo_buscar == 'Alquiler' %}selected{% endif %}>Alquiler</option>
+                <option value="Nómina" {% if tipo_buscar == 'Nómina' %}selected{% endif %}>Nómina</option>
+                <option value="Compras pequeñas" {% if tipo_buscar == 'Compras pequeñas' %}selected{% endif %}>Compras pequeñas</option>
+                <option value="Mantenimiento" {% if tipo_buscar == 'Mantenimiento' %}selected{% endif %}>Mantenimiento</option>
+            </select>
+
+            <button type="submit">Buscar</button>
+            <a class="btn" href="{{ url_for('gastos_empresa') }}">Limpiar</a>
+        </form>
+    </div>
+
+    <div class="tabla">
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Tipo</th>
+                <th>Fecha</th>
+                <th>Mes</th>
+                <th>Monto</th>
+                <th>Referencia</th>
+                <th>Empresa</th>
+                <th>Método</th>
+                <th>Estado</th>
+                <th>Observación</th>
+            </tr>
+
+            {% set ns = namespace(grupo_actual='') %}
+
+            {% for g in gastos %}
+
+                {% if ns.grupo_actual != g[1] %}
+                    <tr class="grupo">
+                        <td colspan="10"><b>Tipo de gasto: {{ g[1] }}</b></td>
+                    </tr>
+                    {% set ns.grupo_actual = g[1] %}
+                {% endif %}
+
+                <tr class="fila-gasto" ondblclick="abrirDetalle({{ g[0] }})">
+                    <td>{{ g[0] }}</td>
+                    <td>{{ g[1] }}</td>
+                    <td>{{ g[2] }}</td>
+                    <td>{{ g[3] }}</td>
+                    <td>{{ g[4] }}</td>
+                    <td>{{ g[5] }}</td>
+                    <td>{{ g[6] }}</td>
+                    <td>{{ g[7] }}</td>
+                    <td>{{ g[8] }}</td>
+                    <td>{{ g[9] }}</td>
+                </tr>
+
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+</body>
+</html>
