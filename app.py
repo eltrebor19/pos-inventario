@@ -13,29 +13,53 @@ import smtplib
 from email.message import EmailMessage
 import shutil
 
+
+
 def crear_tabla_configuracion():
+        conexion = sqlite3.connect("pos.db")
+        cursor = conexion.cursor()
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS configuracion (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                correo_respaldo TEXT
+            )
+        """)
+
+        cursor.execute("SELECT COUNT(*) FROM configuracion")
+        total = cursor.fetchone()[0]
+
+        if total == 0:
+            cursor.execute("""
+                INSERT INTO configuracion (correo_respaldo)
+                VALUES (?)
+            """, ("",))
+
+        conexion.commit()
+        conexion.close()
+
+def crear_tabla_gastos_empresa():
     conexion = sqlite3.connect("pos.db")
     cursor = conexion.cursor()
 
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS configuracion (
+        CREATE TABLE IF NOT EXISTS gastos_empresa (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            correo_respaldo TEXT
+            tipo_gasto TEXT,
+            fecha_pago TEXT,
+            mes_pagado TEXT,
+            monto REAL,
+            referencia TEXT,
+            empresa_suplidora TEXT,
+            metodo_pago TEXT,
+            estado TEXT,
+            observacion TEXT,
+            fecha_registro TEXT
         )
     """)
 
-    cursor.execute("SELECT COUNT(*) FROM configuracion")
-    total = cursor.fetchone()[0]
-
-    if total == 0:
-        cursor.execute("""
-            INSERT INTO configuracion (correo_respaldo)
-            VALUES (?)
-        """, ("",))
-
     conexion.commit()
     conexion.close()
-
 
 def agregar_columna_factura_id_ventas():
     conexion = sqlite3.connect("pos.db")
@@ -140,6 +164,8 @@ def configuracion_respaldo():
         mensaje=mensaje
     )
 
+
+
 def enviar_respaldo_por_correo():
     correo_destino = obtener_correo_respaldo()
 
@@ -174,13 +200,17 @@ def enviar_respaldo_por_correo():
         )
 
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+        with smtplib.SMTP("smtp.gmail.com", 587, timeout=30) as smtp:
+            smtp.ehlo()
+            smtp.starttls()
+            smtp.ehlo()
             smtp.login(remitente, clave_app)
             smtp.send_message(msg)
 
         return True, f"Respaldo enviado correctamente a {correo_destino}"
 
     except Exception as e:
+        print("ERROR AL ENVIAR CORREO:", str(e))
         return False, f"Error al enviar respaldo: {str(e)}"
 
 
@@ -591,6 +621,8 @@ def inicio_panel():
     if "usuario" not in session:
         return redirect(url_for("login"))
 
+    crear_tabla_gastos_empresa()
+
     conexion = sqlite3.connect("pos.db")
     cursor = conexion.cursor()
 
@@ -655,6 +687,13 @@ def inicio_panel():
         productos_bajos=productos_bajos,
         ultimas_ventas=ultimas_ventas
     )
+
+@app.route("/aplicaciones")
+def aplicaciones():
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    return render_template("aplicaciones.html")
 
 
 @app.route("/inventario", methods=["GET", "POST"])
@@ -2061,6 +2100,79 @@ def reset_sistema_completo():
         conexion.close()
         return f"El respaldo sí fue enviado, pero ocurrió un error al resetear el sistema: {str(e)}"
 
+@app.route("/configuracion/empresa")
+def empresa():
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    if session.get("permiso_configuracion") != 1 and session.get("rol") != "admin":
+        return "No tienes permiso para acceder a Empresa"
+
+    return render_template("empresa.html")
+
+@app.route("/gastos_empresa", methods=["GET", "POST"])
+def gastos_empresa():
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    crear_tabla_gastos_empresa()
+
+    conexion = sqlite3.connect("pos.db")
+    cursor = conexion.cursor()
+
+    if request.method == "POST":
+        tipo = request.form["tipo_gasto"]
+        fecha_pago = request.form["fecha_pago"]
+        mes = request.form["mes_pagado"]
+        monto = request.form["monto"]
+        referencia = request.form["referencia"]
+        empresa = request.form["empresa_suplidora"]
+        metodo = request.form["metodo_pago"]
+        estado = request.form["estado"]
+        observacion = request.form["observacion"]
+
+        fecha_registro = datetime.now().strftime("%Y-%m-%d")
+
+        cursor.execute("""
+            INSERT INTO gastos_empresa
+            (tipo_gasto, fecha_pago, mes_pagado, monto, referencia, empresa_suplidora, metodo_pago, estado, observacion, fecha_registro)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (tipo, fecha_pago, mes, monto, referencia, empresa, metodo, estado, observacion, fecha_registro))
+
+        conexion.commit()
+
+    fecha_buscar = request.args.get("fecha_buscar", "").strip()
+    tipo_buscar = request.args.get("tipo_buscar", "").strip()
+
+    sql = "SELECT * FROM gastos_empresa"
+    condiciones = []
+    valores = []
+
+    if fecha_buscar:
+        condiciones.append("fecha_pago = ?")
+        valores.append(fecha_buscar)
+
+    if tipo_buscar:
+        condiciones.append("tipo_gasto = ?")
+        valores.append(tipo_buscar)
+
+    if condiciones:
+        sql += " WHERE " + " AND ".join(condiciones)
+
+    sql += " ORDER BY tipo_gasto ASC, fecha_pago DESC, id DESC"
+
+    cursor.execute(sql, valores)
+    gastos = cursor.fetchall()
+
+    conexion.close()
+
+    return render_template(
+        "gastos_empresa.html",
+        gastos=gastos,
+        fecha_buscar=fecha_buscar,
+        tipo_buscar=tipo_buscar
+    )
+
 @app.route("/logout")
 def logout():
     session.clear()
@@ -2070,11 +2182,17 @@ def logout():
 
 
 
+crear_tabla_configuracion()
+crear_tabla_seguridad_reset()
+crear_tabla_devoluciones()
+agregar_columna_factura_id_ventas()
+crear_tabla_configuracion()
+crear_tabla_configuracion()
+crear_tabla_gastos_empresa()
+crear_tabla_devoluciones()
+agregar_columna_factura_id_ventas()
+
+
+
 if __name__ == "__main__":
-    crear_tabla_configuracion()
-    crear_tabla_seguridad_reset()
-    crear_tabla_devoluciones()
-    # crear_tabla_bloqueo_reset()
-    # crear_tabla_auditoria()
-    agregar_columna_factura_id_ventas()
     app.run(debug=True)

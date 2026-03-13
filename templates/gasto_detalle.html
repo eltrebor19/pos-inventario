@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<title>Detalle del Gasto</title>
+
+<style>
+body{
+    font-family:Arial;
+    background:white;
+    margin:0;
+    padding:30px;
+}
+
+.factura{
+    max-width:800px;
+    margin:auto;
+    border:1px solid #ccc;
+    padding:30px;
+    border-radius:10px;
+}
+
+h1, h2{
+    text-align:center;
+    color:#1f4e79;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+td, th{
+    border:1px solid #ccc;
+    padding:10px;
+}
+
+th{
+    background:#1f4e79;
+    color:white;
+    width:35%;
+    text-align:left;
+}
+
+.botones{
+    text-align:center;
+    margin-top:20px;
+}
+
+button{
+    background:#1f4e79;
+    color:white;
+    padding:10px 15px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+</style>
+
+</head>
+<body>
+
+<div class="factura">
+    <h1>Comprobante de Gasto</h1>
+    <h2>{{ gasto[1] }}</h2>
+
+    <table>
+        <tr><th>ID</th><td>{{ gasto[0] }}</td></tr>
+        <tr><th>Tipo de gasto</th><td>{{ gasto[1] }}</td></tr>
+        <tr><th>Fecha de pago</th><td>{{ gasto[2] }}</td></tr>
+        <tr><th>Mes pagado</th><td>{{ gasto[3] }}</td></tr>
+        <tr><th>Monto</th><td>{{ gasto[4] }}</td></tr>
+        <tr><th>Referencia</th><td>{{ gasto[5] }}</td></tr>
+        <tr><th>Empresa suplidora</th><td>{{ gasto[6] }}</td></tr>
+        <tr><th>Método de pago</th><td>{{ gasto[7] }}</td></tr>
+        <tr><th>Estado</th><td>{{ gasto[8] }}</td></tr>
+        <tr><th>Observación</th><td>{{ gasto[9] }}</td></tr>
+        <tr><th>Fecha de registro</th><td>{{ gasto[10] }}</td></tr>
+    </table>
+
+    <div class="botones">
+        <button onclick="window.print()">Imprimir</button>
+    </div>
+</div>
+
+</body>
+</html>
