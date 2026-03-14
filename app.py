@@ -61,6 +61,44 @@ def crear_tabla_gastos_empresa():
     conexion.commit()
     conexion.close()
 
+def agregar_columnas_productos_empresa():
+        conexion = sqlite3.connect("pos.db")
+        cursor = conexion.cursor()
+
+        cursor.execute("PRAGMA table_info(productos)")
+        columnas = [col[1] for col in cursor.fetchall()]
+
+        if "tipo" not in columnas:
+            cursor.execute("ALTER TABLE productos ADD COLUMN tipo TEXT DEFAULT 'Sin tipo'")
+
+        if "costo" not in columnas:
+            cursor.execute("ALTER TABLE productos ADD COLUMN costo REAL DEFAULT 0")
+
+        if "ganancia" not in columnas:
+            cursor.execute("ALTER TABLE productos ADD COLUMN ganancia REAL DEFAULT 0")
+
+        conexion.commit()
+        conexion.close()
+
+def agregar_columnas_productos_empresa():
+    conexion = sqlite3.connect("pos.db")
+    cursor = conexion.cursor()
+
+    cursor.execute("PRAGMA table_info(productos)")
+    columnas = [col[1] for col in cursor.fetchall()]
+
+    if "tipo" not in columnas:
+        cursor.execute("ALTER TABLE productos ADD COLUMN tipo TEXT DEFAULT 'Sin tipo'")
+
+    if "costo" not in columnas:
+        cursor.execute("ALTER TABLE productos ADD COLUMN costo REAL DEFAULT 0")
+
+    if "ganancia" not in columnas:
+        cursor.execute("ALTER TABLE productos ADD COLUMN ganancia REAL DEFAULT 0")
+
+    conexion.commit()
+    conexion.close()
+
 def agregar_columna_factura_id_ventas():
     conexion = sqlite3.connect("pos.db")
     cursor = conexion.cursor()
@@ -712,14 +750,19 @@ def inventario():
         accion = request.form.get("accion", "").strip()
 
         if accion == "agregar":
-            nombre = request.form["nombre"].strip().lower()
+            tipo = request.form["tipo"].strip()
+            nombre = request.form["nombre"].strip()
             costo = float(request.form["costo"])
             ganancia = float(request.form["ganancia"])
             cantidad = int(request.form["cantidad"])
 
             precio = costo + (costo * ganancia / 100)
 
-            cursor.execute("SELECT id, cantidad FROM productos WHERE lower(nombre) = ?", (nombre,))
+            cursor.execute("""
+                SELECT id, cantidad
+                FROM productos
+                WHERE lower(nombre) = ? AND lower(tipo) = ?
+            """, (nombre.lower(), tipo.lower()))
             producto_existente = cursor.fetchone()
 
             if producto_existente:
@@ -729,14 +772,14 @@ def inventario():
 
                 cursor.execute("""
                     UPDATE productos
-                    SET cantidad = ?, precio = ?
+                    SET cantidad = ?, precio = ?, costo = ?, ganancia = ?, tipo = ?
                     WHERE id = ?
-                """, (nueva_cantidad, precio, id_producto))
+                """, (nueva_cantidad, precio, costo, ganancia, tipo, id_producto))
             else:
                 cursor.execute("""
-                    INSERT INTO productos (nombre, precio, cantidad)
-                    VALUES (?, ?, ?)
-                """, (nombre, precio, cantidad))
+                    INSERT INTO productos (tipo, nombre, costo, ganancia, precio, cantidad)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (tipo, nombre, costo, ganancia, precio, cantidad))
 
             conexion.commit()
             mensaje = "Producto agregado correctamente"
@@ -2173,6 +2216,263 @@ def gastos_empresa():
         tipo_buscar=tipo_buscar
     )
 
+@app.route("/ganancias_empresa")
+def ganancias_empresa():
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    if session.get("permiso_configuracion") != 1 and session.get("rol") != "admin":
+        return "No tienes permiso para acceder a Ganancias de la Empresa"
+
+    fecha_desde = request.args.get("fecha_desde", "").strip()
+    fecha_hasta = request.args.get("fecha_hasta", "").strip()
+    articulo = request.args.get("articulo", "").strip()
+
+    conexion = sqlite3.connect("pos.db")
+    cursor = conexion.cursor()
+
+    sql = """
+        SELECT
+            COALESCE(NULLIF(TRIM(p.tipo), ''), 'Sin tipo') AS tipo,
+            v.nombre_producto,
+            COALESCE(MAX(CAST(p.costo AS REAL)), 0) AS costo_unitario,
+            COALESCE(MAX(CAST(p.ganancia AS REAL)), 0) AS porcentaje_ganancia,
+            COALESCE(MAX(CAST(v.precio AS REAL)), 0) AS precio_venta,
+            IFNULL(SUM(CAST(v.cantidad AS INTEGER)), 0) AS cantidad_vendida,
+            IFNULL(SUM(CAST(v.cantidad AS INTEGER) * COALESCE(CAST(p.costo AS REAL), 0)), 0) AS inversion_total,
+            IFNULL(SUM(CAST(v.total AS REAL)), 0) AS total_vendido,
+            IFNULL(SUM(CAST(v.total AS REAL)), 0) - IFNULL(SUM(CAST(v.cantidad AS INTEGER) * COALESCE(CAST(p.costo AS REAL), 0)), 0) AS ganancia_total
+        FROM ventas v
+        LEFT JOIN productos p ON p.id = v.producto_id
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM devoluciones d
+            WHERE d.venta_id = v.id
+              AND d.estado = 'confirmada'
+        )
+    """
+
+    parametros = []
+
+    if fecha_desde:
+        sql += " AND date(v.fecha) >= date(?)"
+        parametros.append(fecha_desde)
+
+    if fecha_hasta:
+        sql += " AND date(v.fecha) <= date(?)"
+        parametros.append(fecha_hasta)
+
+    if articulo:
+        sql += " AND lower(v.nombre_producto) LIKE ?"
+        parametros.append(f"%{articulo.lower()}%")
+
+    sql += """
+        GROUP BY COALESCE(NULLIF(TRIM(p.tipo), ''), 'Sin tipo'), v.nombre_producto
+        ORDER BY tipo ASC, v.nombre_producto ASC
+    """
+
+    cursor.execute(sql, parametros)
+    ganancias = cursor.fetchall()
+
+    total_invertido_general = 0
+    total_vendido_general = 0
+    ganancia_general = 0
+
+    for g in ganancias:
+        total_invertido_general += float(g[6] or 0)
+        total_vendido_general += float(g[7] or 0)
+        ganancia_general += float(g[8] or 0)
+
+    conexion.close()
+
+    return render_template(
+        "ganancias_empresa.html",
+        ganancias=ganancias,
+        total_invertido_general=total_invertido_general,
+        total_vendido_general=total_vendido_general,
+        ganancia_general=ganancia_general,
+        fecha_desde=fecha_desde,
+        fecha_hasta=fecha_hasta,
+        articulo=articulo
+    )
+
+@app.route("/ganancias_empresa_pdf")
+def ganancias_empresa_pdf():
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    if session.get("permiso_configuracion") != 1 and session.get("rol") != "admin":
+        return "No tienes permiso para exportar el PDF de Ganancias de la Empresa"
+
+    fecha_desde = request.args.get("fecha_desde", "").strip()
+    fecha_hasta = request.args.get("fecha_hasta", "").strip()
+    articulo = request.args.get("articulo", "").strip()
+
+    conexion = sqlite3.connect("pos.db")
+    cursor = conexion.cursor()
+
+    sql = """
+        SELECT
+            COALESCE(NULLIF(TRIM(p.tipo), ''), 'Sin tipo') AS tipo,
+            v.nombre_producto,
+            COALESCE(MAX(CAST(p.costo AS REAL)), 0) AS costo_unitario,
+            COALESCE(MAX(CAST(p.ganancia AS REAL)), 0) AS porcentaje_ganancia,
+            COALESCE(MAX(CAST(v.precio AS REAL)), 0) AS precio_venta,
+            IFNULL(SUM(CAST(v.cantidad AS INTEGER)), 0) AS cantidad_vendida,
+            IFNULL(SUM(CAST(v.cantidad AS INTEGER) * COALESCE(CAST(p.costo AS REAL), 0)), 0) AS inversion_total,
+            IFNULL(SUM(CAST(v.total AS REAL)), 0) AS total_vendido,
+            IFNULL(SUM(CAST(v.total AS REAL)), 0) - IFNULL(SUM(CAST(v.cantidad AS INTEGER) * COALESCE(CAST(p.costo AS REAL), 0)), 0) AS ganancia_total
+        FROM ventas v
+        LEFT JOIN productos p ON p.id = v.producto_id
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM devoluciones d
+            WHERE d.venta_id = v.id
+              AND d.estado = 'confirmada'
+        )
+    """
+
+    parametros = []
+
+    if fecha_desde:
+        sql += " AND date(v.fecha) >= date(?)"
+        parametros.append(fecha_desde)
+
+    if fecha_hasta:
+        sql += " AND date(v.fecha) <= date(?)"
+        parametros.append(fecha_hasta)
+
+    if articulo:
+        sql += " AND lower(v.nombre_producto) LIKE ?"
+        parametros.append(f"%{articulo.lower()}%")
+
+    sql += """
+        GROUP BY COALESCE(NULLIF(TRIM(p.tipo), ''), 'Sin tipo'), v.nombre_producto
+        ORDER BY tipo ASC, v.nombre_producto ASC
+    """
+
+    cursor.execute(sql, parametros)
+    ganancias = cursor.fetchall()
+    conexion.close()
+
+    total_invertido_general = 0
+    total_vendido_general = 0
+    ganancia_general = 0
+
+    for g in ganancias:
+        total_invertido_general += float(g[6] or 0)
+        total_vendido_general += float(g[7] or 0)
+        ganancia_general += float(g[8] or 0)
+
+    carpeta = "reportes"
+    if not os.path.exists(carpeta):
+        os.makedirs(carpeta)
+
+    fecha_archivo = datetime.now().strftime("%Y%m%d_%H%M%S")
+    archivo = f"{carpeta}/ganancias_empresa_{fecha_archivo}.pdf"
+
+    c = canvas.Canvas(archivo, pagesize=letter)
+    width, height = letter
+
+    y = height - 40
+
+    c.setFont("Helvetica-Bold", 18)
+    c.drawString(40, y, "Ganancias de la Empresa")
+    y -= 25
+
+    c.setFont("Helvetica", 10)
+    filtro_texto = "Filtros: "
+    if fecha_desde:
+        filtro_texto += f"Desde {fecha_desde}  "
+    if fecha_hasta:
+        filtro_texto += f"Hasta {fecha_hasta}  "
+    if articulo:
+        filtro_texto += f"Articulo: {articulo}"
+
+    if filtro_texto == "Filtros: ":
+        filtro_texto += "Todos"
+
+    c.drawString(40, y, filtro_texto)
+    y -= 25
+
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(40, y, f"Total invertido: RD$ {total_invertido_general:.2f}")
+    c.drawString(230, y, f"Total vendido: RD$ {total_vendido_general:.2f}")
+    c.drawString(410, y, f"Ganancia: RD$ {ganancia_general:.2f}")
+    y -= 30
+
+    c.setFont("Helvetica-Bold", 8)
+    c.drawString(40, y, "Tipo")
+    c.drawString(95, y, "Producto")
+    c.drawString(220, y, "Costo")
+    c.drawString(275, y, "%")
+    c.drawString(310, y, "Precio")
+    c.drawString(365, y, "Cant.")
+    c.drawString(405, y, "Invertido")
+    c.drawString(475, y, "Vendido")
+    c.drawString(540, y, "Ganancia")
+    y -= 15
+
+    c.line(40, y, 570, y)
+    y -= 15
+
+    tipo_actual = ""
+
+    c.setFont("Helvetica", 8)
+
+    for g in ganancias:
+        tipo = str(g[0])
+        producto = str(g[1])[:20]
+        costo = float(g[2] or 0)
+        porcentaje = float(g[3] or 0)
+        precio = float(g[4] or 0)
+        cantidad = int(g[5] or 0)
+        invertido = float(g[6] or 0)
+        vendido = float(g[7] or 0)
+        ganancia = float(g[8] or 0)
+
+        if y < 60:
+            c.showPage()
+            y = height - 40
+
+            c.setFont("Helvetica-Bold", 8)
+            c.drawString(40, y, "Tipo")
+            c.drawString(95, y, "Producto")
+            c.drawString(220, y, "Costo")
+            c.drawString(275, y, "%")
+            c.drawString(310, y, "Precio")
+            c.drawString(365, y, "Cant.")
+            c.drawString(405, y, "Invertido")
+            c.drawString(475, y, "Vendido")
+            c.drawString(540, y, "Ganancia")
+            y -= 15
+
+            c.line(40, y, 570, y)
+            y -= 15
+            c.setFont("Helvetica", 8)
+
+        if tipo_actual != tipo:
+            c.setFont("Helvetica-Bold", 9)
+            c.drawString(40, y, f"Tipo: {tipo}")
+            y -= 15
+            c.setFont("Helvetica", 8)
+            tipo_actual = tipo
+
+        c.drawString(40, y, tipo[:10])
+        c.drawString(95, y, producto)
+        c.drawRightString(260, y, f"{costo:.2f}")
+        c.drawRightString(295, y, f"{porcentaje:.2f}")
+        c.drawRightString(350, y, f"{precio:.2f}")
+        c.drawRightString(390, y, f"{cantidad}")
+        c.drawRightString(465, y, f"{invertido:.2f}")
+        c.drawRightString(530, y, f"{vendido:.2f}")
+        c.drawRightString(590, y, f"{ganancia:.2f}")
+        y -= 15
+
+    c.save()
+
+    return send_file(archivo, as_attachment=False)
+
 @app.route("/logout")
 def logout():
     session.clear()
@@ -2189,6 +2489,8 @@ agregar_columna_factura_id_ventas()
 crear_tabla_configuracion()
 crear_tabla_configuracion()
 crear_tabla_gastos_empresa()
+agregar_columnas_productos_empresa()
+agregar_columnas_productos_empresa()
 crear_tabla_devoluciones()
 agregar_columna_factura_id_ventas()
 

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Ganancias de la Empresa</title>
+
+<style>
+body{
+    font-family:Arial;
+    background:#f4f6f8;
+    margin:0;
+    padding:20px;
+}
+
+.contenedor{
+    width:1200px;
+    max-width:100%;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+    color:#1f4e79;
+    margin-bottom:20px;
+}
+
+.resumen{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+    text-align:center;
+}
+
+.card h3{
+    margin:0 0 10px 0;
+    color:#1f4e79;
+}
+
+.card p{
+    margin:0;
+    font-size:22px;
+    font-weight:bold;
+}
+
+.tabla{
+    background:white;
+    padding:15px;
+    border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+    overflow-x:auto;
+}
+
+.filtros{
+    background:white;
+    padding:15px;
+    border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+    margin-bottom:20px;
+}
+
+.filtros form{
+    display:grid;
+    grid-template-columns: 1fr 1fr 2fr auto auto auto;
+    gap:10px;
+    align-items:end;
+}
+
+.filtros label{
+    display:block;
+    font-weight:bold;
+    margin-bottom:5px;
+    color:#1f4e79;
+}
+
+.filtros input{
+    width:100%;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    box-sizing:border-box;
+}
+
+.btn-filtrar{
+    background:#1f4e79;
+    color:white;
+    border:none;
+    padding:10px 14px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.btn-limpiar{
+    background:#6c757d;
+    color:white;
+    text-decoration:none;
+    padding:10px 14px;
+    border-radius:8px;
+    font-weight:bold;
+    text-align:center;
+}
+
+@media (max-width: 900px){
+    .resumen{
+        grid-template-columns:1fr;
+    }
+
+    .filtros form{
+        grid-template-columns:1fr;
+    }
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th, td{
+    border:1px solid #ccc;
+    padding:8px;
+    text-align:center;
+}
+
+th{
+    background:#1f4e79;
+    color:white;
+}
+
+tr.grupo{
+    background:#dbe9f6;
+    font-weight:bold;
+}
+
+tr:hover{
+    background:#f8fbff;
+}
+</style>
+</head>
+<body>
+
+<div class="contenedor">
+    <h1>Ganancias de la Empresa</h1>
+
+<div class="filtros">
+    <form method="GET" action="{{ url_for('ganancias_empresa') }}">
+        <div>
+            <label for="fecha_desde">Fecha desde</label>
+            <input type="date" id="fecha_desde" name="fecha_desde" value="{{ fecha_desde }}">
+        </div>
+
+        <div>
+            <label for="fecha_hasta">Fecha hasta</label>
+            <input type="date" id="fecha_hasta" name="fecha_hasta" value="{{ fecha_hasta }}">
+        </div>
+
+        <div>
+            <label for="articulo">Nombre del artículo</label>
+            <input type="text" id="articulo" name="articulo" placeholder="Escriba el nombre del producto" value="{{ articulo }}">
+        </div>
+
+        <div>
+            <button type="submit" class="btn-filtrar">Buscar</button>
+        </div>
+
+        <div>
+            <a href="{{ url_for('ganancias_empresa') }}" class="btn-limpiar">Limpiar</a>
+        </div>
+    </form>
+</div>
+        <div>
+    <a href="{{ url_for('ganancias_empresa_pdf', fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, articulo=articulo) }}" class="btn-filtrar" target="_blank">
+        Exportar PDF
+    </a>
+</div>
+
+    <div class="resumen">
+        <div class="card">
+            <h3>Total invertido</h3>
+            <p>RD$ {{ "%.2f"|format(total_invertido_general) }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Total vendido</h3>
+            <p>RD$ {{ "%.2f"|format(total_vendido_general) }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Ganancia general</h3>
+            <p>RD$ {{ "%.2f"|format(ganancia_general) }}</p>
+        </div>
+    </div>
+
+    <div class="tabla">
+        <table>
+            <tr>
+                <th>Tipo</th>
+                <th>Producto</th>
+                <th>Costo unitario</th>
+                <th>% Ganancia</th>
+                <th>Precio venta</th>
+                <th>Cantidad vendida</th>
+                <th>Total invertido</th>
+                <th>Total vendido</th>
+                <th>Ganancia total</th>
+            </tr>
+
+            {% set ns = namespace(tipo_actual='') %}
+
+            {% for g in ganancias %}
+                {% if ns.tipo_actual != g[0] %}
+                    <tr class="grupo">
+                        <td colspan="9">Tipo: {{ g[0] }}</td>
+                    </tr>
+                    {% set ns.tipo_actual = g[0] %}
+                {% endif %}
+
+                <tr>
+                    <td>{{ g[0] }}</td>
+                    <td>{{ g[1] }}</td>
+                    <td>RD$ {{ "%.2f"|format(g[2]) }}</td>
+                    <td>{{ "%.2f"|format(g[3]) }}%</td>
+                    <td>RD$ {{ "%.2f"|format(g[4]) }}</td>
+                    <td>{{ g[5] }}</td>
+                    <td>RD$ {{ "%.2f"|format(g[6]) }}</td>
+                    <td>RD$ {{ "%.2f"|format(g[7]) }}</td>
+                    <td>RD$ {{ "%.2f"|format(g[8]) }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+</body>
+</html>
